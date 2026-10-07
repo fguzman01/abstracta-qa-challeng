@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Salidas de Playwright
+test-results/
+playwright-report/
+
+# Salidas de Allure
+allure-results/
+allure-report/
+
+# Reportes blob de Playwright (sharding / merge en CI)
+blob-report/
+
+# Sistema
+.DS_Store
