@@ -1,0 +1,5 @@
+{
+  "petNamePrefix": "PRD",
+  "category": { "id": 2, "name": "Cats" },
+  "tags": [{ "id": 2, "name": "production" }]
+}

@@ -1,0 +1,5 @@
+{
+  "petNamePrefix": "STG",
+  "category": { "id": 1, "name": "Dogs" },
+  "tags": [{ "id": 1, "name": "staging" }]
+}
