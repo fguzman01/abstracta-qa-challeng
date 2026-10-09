@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+  "test": "playwright test",
+  "test:stg": "cross-env ENV=staging playwright test",
+  "test:prod": "cross-env ENV=production playwright test"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -11,6 +15,7 @@
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.4",
+    "cross-env": "^10.1.0",
     "dotenv": "^18.0.6"
   }
 }

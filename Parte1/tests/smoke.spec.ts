@@ -2,17 +2,20 @@ import { test, expect } from '@playwright/test';
 import { PetClient } from '../src/clients/PetClient';
 import { Pet } from '../src/type/pet';
 import { envData } from '../config/test-data';
+import { buildPet } from '../config/data/pet.factory';
 
 test('smoke: crear y obtener una mascota', async ({ request }) => {
   const petClient = new PetClient(request);
 
-  const pet: Pet = {
+  /*const pet: Pet = {
     id: Date.now(),
     name: `${envData.petNamePrefix}-Smoke Dog`,
     photoUrls: [],
     status: 'available',
     tags: envData.tags,
-  };
+  };*/
+
+  const pet = buildPet();
 
   const createResponse = await petClient.create(pet);
   expect(createResponse).toBeOK();
