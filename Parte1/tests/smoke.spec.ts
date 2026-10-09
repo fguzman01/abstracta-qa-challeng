@@ -1,19 +1,12 @@
-import { test, expect } from '@playwright/test';
+//import { test, expect } from '@playwright/test';
 import { PetClient } from '../src/clients/PetClient';
 import { Pet } from '../src/type/pet';
 import { envData } from '../config/test-data';
 import { buildPet } from '../config/data/pet.factory';
+import { test, expect } from '../src/fixtures/api.fixture';
 
-test('smoke: crear y obtener una mascota', async ({ request }) => {
-  const petClient = new PetClient(request);
-
-  /*const pet: Pet = {
-    id: Date.now(),
-    name: `${envData.petNamePrefix}-Smoke Dog`,
-    photoUrls: [],
-    status: 'available',
-    tags: envData.tags,
-  };*/
+test('smoke: crear y obtener una mascota', async ({ petClient }) => {
+  //const petClient = new PetClient(request);
 
   const pet = buildPet();
 
