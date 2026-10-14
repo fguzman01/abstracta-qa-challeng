@@ -1,0 +1,11 @@
+{
+  "product": "Samsung galaxy s6",
+  "customer": {
+    "name": "STG Tester",
+    "country": "Chile",
+    "city": "Santiago",
+    "card": "4111111111111111",
+    "month": "10",
+    "year": "2026"
+  }
+}

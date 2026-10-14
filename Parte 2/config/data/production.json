@@ -1,0 +1,11 @@
+{
+  "product": "Nokia lumia 1520",
+  "customer": {
+    "name": "PRD Tester",
+    "country": "Chile",
+    "city": "Valparaiso",
+    "card": "5555555555554444",
+    "month": "12",
+    "year": "2027"
+  }
+}

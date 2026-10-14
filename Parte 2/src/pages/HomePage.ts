@@ -42,4 +42,8 @@ export class HomePage {
         await expect(firstTitle).not.toHaveText(titleBefore);
     }
 
+    async openProduct(name: string): Promise<void> {
+        await this.page.locator('#tbodyid').getByRole('link', { name, exact: true }).click();
+    }
+
 }
