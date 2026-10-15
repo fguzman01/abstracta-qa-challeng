@@ -17,12 +17,23 @@ export class PurchaseFlow {
     private readonly cartPage: CartPage,
   ) {}
 
+  async addToCart(productName: string): Promise<number> {
+    return test.step(`Agregar "${productName}" al carrito`, async () => {
+        await this.homePage.goto();
+        await this.homePage.openProduct(productName);
+        await this.productPage.expectProductLoaded(productName);
+        const price = await this.productPage.getPrice();
+        await this.productPage.addToCart();
+        return price;
+    });
+  }
+
   async buyProduct(productName: string, customer: Customer): Promise<PurchaseResult> {
     await test.step(`Agregar "${productName}" al carrito`, async () => {
       await this.homePage.goto();
       await this.homePage.openProduct(productName);
       await this.productPage.expectProductLoaded(productName);
-      await this.productPage.addToCart();
+      await this.addToCart(productName)
     });
 
     const cartTotal = await test.step('Verificar el carrito', async () => {

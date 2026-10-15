@@ -1,5 +1,6 @@
-import { Locator, Page } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 import { Customer } from '../types/customer';
+import { acceptNextDialog } from '../utils/dialog';
 
 export interface PurchaseConfirmation {
   title: string;
@@ -53,4 +54,13 @@ export class PlaceOrderModal {
   async closeConfirmation(): Promise<void> {
     await this.confirmationOkButton.click();
   }
+
+  async submitExpectingAlert(): Promise<string> {
+    return acceptNextDialog(this.page, () => this.purchaseButton.click())
+  }
+
+  async expectNoConfirmation(): Promise<void> {
+    await expect(this.confirmationTitle).toBeHidden();
+  }
+
 }

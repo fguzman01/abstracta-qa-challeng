@@ -1,5 +1,6 @@
 {
   "product": "Nokia lumia 1520",
+  "cartProducts": ["Nokia lumia 1520", "Sony xperia z5"],
   "customer": {
     "name": "PRD Tester",
     "country": "Chile",

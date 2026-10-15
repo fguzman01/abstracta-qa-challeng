@@ -4,6 +4,7 @@ import { Customer } from '../src/types/customer';
 
 export interface EnvData {
   product: string;
+  cartProducts: string[];
   customer: Customer;
 }
 
@@ -14,4 +15,13 @@ if (!fs.existsSync(filePath)) {
   throw new Error(`No existe el archivo de datos para ENV=${ENV}: ${filePath}`);
 }
 
-export const envData: EnvData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as EnvData;
+
+const requiredKeys: (keyof EnvData)[] = ['product', 'cartProducts', 'customer'];
+const missingKeys = requiredKeys.filter((key) => data[key] === undefined);
+
+if (missingKeys.length > 0) {
+  throw new Error(`Faltan campos en config/data/${ENV}.json: ${missingKeys.join(', ')}`);
+}
+
+export const envData = data;

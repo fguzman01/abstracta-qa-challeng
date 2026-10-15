@@ -1,5 +1,6 @@
 {
   "product": "Samsung galaxy s6",
+  "cartProducts": ["Samsung galaxy s6", "Nexus 6"],
   "customer": {
     "name": "STG Tester",
     "country": "Chile",
