@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, test } from '@playwright/test';
 
 export async function acceptNextDialog(page: Page, action: () => Promise<void>): Promise<string> {
   const viewDelay = Number(process.env.SLOW_MO ?? 0);
@@ -11,6 +11,7 @@ export async function acceptNextDialog(page: Page, action: () => Promise<void>):
           await page.waitForTimeout(viewDelay);
         }
         await dialog.accept();
+        await test.info().attach('dialog-message', { body: text, contentType: 'text/plain' });
         resolve(text);
       } catch (error) {
         reject(error);

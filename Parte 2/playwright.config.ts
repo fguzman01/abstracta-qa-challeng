@@ -16,13 +16,20 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['allure-playwright', {
+      resultsDir: 'allure-results',
+      environmentInfo: { Ambiente: ENV, 'Base URL': BASE_URL, Browser: 'chromium' },
+    }],
+  ],
 
   use: {
     baseURL: BASE_URL,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     launchOptions: {
     slowMo: Number(process.env.SLOW_MO ?? 500),
     },

@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "test": "playwright test",
-  "test:stg": "cross-env ENV=staging playwright test",
-  "test:prod": "cross-env ENV=production playwright test",
-  "test:headed": "cross-env ENV=staging playwright test --headed",
-  "test:ui": "cross-env ENV=staging playwright test --ui"
-},
+    "test": "playwright test",
+    "test:stg": "cross-env ENV=staging playwright test",
+    "test:prod": "cross-env ENV=production playwright test",
+    "test:headed": "cross-env ENV=staging playwright test --headed",
+    "test:ui": "cross-env ENV=staging playwright test --ui",
+    "clean:reports": "rimraf allure-results allure-report",
+    "pretest:stg": "npm run clean:reports",
+    "pretest:prod": "npm run clean:reports",
+    "report:generate": "allure generate ./allure-results -o ./allure-report",
+    "report:open": "allure open ./allure-report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,7 +22,10 @@
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
+    "allure": "^3.20.1",
+    "allure-playwright": "^3.13.0",
     "cross-env": "^10.1.0",
-    "dotenv": "^18.0.8"
+    "dotenv": "^18.0.8",
+    "rimraf": "^6.1.3"
   }
 }
