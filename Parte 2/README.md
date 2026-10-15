@@ -93,3 +93,63 @@ output/            Archivos generados por los tests (no se versiona)
 
 - Ejecutar en Firefox y WebKit agregando proyectos en `playwright.config.ts`.
 - Validar que no haya productos repetidos entre páginas en el escenario A.
+
+## Parte 3 - Reporting con Allure
+
+### Reporte elegido
+
+**Allure 3** (`allure-playwright` + CLI `allure`), adicional al reporte HTML nativo de Playwright.
+
+Se eligió Allure 3 porque funciona solo con Node.js: a diferencia de Allure 2, no requiere Java, y alcanza con `npm install` para usarlo.
+
+### Qué muestra
+
+- Tests ejecutados, resultado (pass/fail) y duración
+- Pasos de cada test (`test.step`)
+- Adjuntos JSON con las respuestas de la API
+- Ambiente y URL base de la ejecución (portada del reporte)
+- **Evidencia de fallo:** screenshot, video y trace de Playwright, adjuntados automáticamente cuando un test falla. Los mensajes de los diálogos nativos (`alert`) se adjuntan como texto, porque el navegador los dibuja fuera de la página y no aparecen en screenshots ni videos.
+
+### Cambios en el framework
+
+- `playwright.config.ts`: se agregaron los reporters `list`, `html` (sin apertura automática) y `allure-playwright`. Screenshot y video en `only-on-failure` / `retain-on-failure` (ya configurados desde el inicio) y `trace: 'retain-on-failure'`.`.
+- `package.json`: scripts para generar y abrir el reporte, y limpieza automática de resultados antes de cada ejecución (`pretest:stg` / `pretest:prod`), para que el reporte no mezcle corridas anteriores.
+
+### Cómo generar y ver el reporte
+
+```bash
+npm run test:stg          # ejecuta los tests (limpia resultados anteriores)
+npm run report:generate   # genera el HTML en ./allure-report
+npm run report:open       # abre el reporte en el navegador
+```
+
+## Parte 4.1 - Paralelización
+
+### Estrategia
+
+Paralelización **por test y por browser**:
+
+- `fullyParallel: true`: cada test se asigna a un worker de forma independiente.
+- Tres proyectos (`chromium`, `firefox`, `webkit`): cada test se ejecuta en los tres browsers, y esas ejecuciones también se reparten entre los workers.
+
+Para ejecutar en un solo browser: `npm run test:stg -- --project=chromium`.
+
+### Aislamiento de datos
+
+- Cada test corre en su propio **browser context** (equivalente a una ventana de incógnito nueva). Como Demoblaze guarda el carrito en una cookie, cada test tiene su propio carrito vacío.
+- **Problema encontrado:** al agregar browsers, el escenario A de los tres browsers escribía en paralelo el mismo archivo (`products-staging.txt`) y se pisaban. Se resolvió incluyendo el browser en el nombre del archivo (`products-<ambiente>-<browser>.txt`). El carrito no tenía este problema porque vive dentro del browser; el archivo no, porque vive en el disco compartido.
+
+### Cambios realizados
+
+- `playwright.config.ts`: proyectos `firefox` y `webkit`, y `workers: process.env.CI ? 2 : undefined`.
+- `product-catalog.spec.ts`: nombre de archivo por ambiente y browser.
+- `package.json`: los scripts de depuración (`test:headed`, `test:slow`) se limitan a Chromium para no abrir tres browsers a la vez.
+
+### Impacto en tiempo (12 tests = 4 tests × 3 browsers, promedio de 3 corridas)
+
+| Ejecución | Tiempo | vs. secuencial |
+|---|---|---|
+| Secuencial (1 worker) | ~82 s | — |
+| Paralelo (11 workers) | 23.0 s | **72% menos** (3.6× más rápido) |
+
+**Observación:** en paralelo, cada test individual se vuelve más lento (ej: la compra pasa de ~11 s a ~16-18 s), porque los browsers compiten por CPU y memoria y aumenta la carga sobre el sitio. Por eso 11 workers no rinden 11 veces más: el tiempo total queda cerca del test más lento más el arranque de los browsers.

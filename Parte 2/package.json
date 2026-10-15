@@ -7,13 +7,14 @@
     "test": "playwright test",
     "test:stg": "cross-env ENV=staging playwright test",
     "test:prod": "cross-env ENV=production playwright test",
-    "test:headed": "cross-env ENV=staging playwright test --headed",
     "test:ui": "cross-env ENV=staging playwright test --ui",
     "clean:reports": "rimraf allure-results allure-report",
     "pretest:stg": "npm run clean:reports",
     "pretest:prod": "npm run clean:reports",
     "report:generate": "allure generate ./allure-results -o ./allure-report",
-    "report:open": "allure open ./allure-report"
+    "report:open": "allure open ./allure-report",
+    "test:headed": "cross-env ENV=staging playwright test --headed --project=chromium",
+    "test:slow": "cross-env ENV=staging SLOW_MO=500 playwright test --headed --project=chromium"
   },
   "keywords": [],
   "author": "",

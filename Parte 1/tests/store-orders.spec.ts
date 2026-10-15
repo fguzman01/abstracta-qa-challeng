@@ -10,10 +10,13 @@ test('Escenario B: listar mascotas disponibles y crear una orden para 5 de ellas
   const createdOrders: Order[] = [];
 
   await test.step(`Listar mascotas disponibles y guardar ${PETS_TO_ORDER}`, async () => {
-    const response = await petClient.findByStatus('available');
-    expect(response).toBeOK();
+    let pets: Pet[] = [];
 
-    const pets: Pet[] = await response.json();
+    await expect(async () => {
+      const response = await petClient.findByStatus('available');
+      await expect(response, 'El listado de mascotas disponibles debe responder 2xx').toBeOK();
+      pets = await response.json();
+    }).toPass({ timeout: 15_000, intervals: [1_000, 2_000, 3_000] });
 
     for (const pet of pets) {
       if (selectedPets.size === PETS_TO_ORDER) break;
@@ -29,7 +32,7 @@ test('Escenario B: listar mascotas disponibles y crear una orden para 5 de ellas
     for (const pet of selectedPets.values()) {
       const order = buildOrder(pet.id);
       const response = await storeClient.createOrder(order);
-      expect(response).toBeOK();
+      await expect(response).toBeOK();
 
       const body: Order = await response.json();
       expect(body).toMatchObject({ id: order.id, petId: pet.id, status: 'placed' });

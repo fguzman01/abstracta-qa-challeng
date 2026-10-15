@@ -28,12 +28,12 @@ test('Escenario C: cambiar estado de available a sold y verificar por estado', a
 
   await test.step('Crear mascota en estado available', async () => {
     const response = await petClient.create(pet);
-    expect(response, 'La creación de la mascota debe responder 2xx').toBeOK();
+    await expect(response, 'La creación de la mascota debe responder 2xx').toBeOK();
   });
 
   await test.step('Actualizar el estado a sold', async () => {
     const response = await petClient.update({ ...pet, status: 'sold' });
-    expect(response, 'La actualización debe responder 2xx').toBeOK();
+    await expect(response, 'La actualización debe responder 2xx').toBeOK();
 
     const body: Pet = await response.json();
     expect(body.status, 'El PUT debe devolver la mascota con status sold').toBe('sold');

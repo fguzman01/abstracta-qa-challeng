@@ -7,8 +7,8 @@ test('Opcional 2: no permite comprar con el formulario vacío', async ({ cartPag
   const alertMessage = await test.step('Enviar el formulario vacío', () => modal.submitExpectingAlert());
 
   await test.step('Validar que la compra fue rechazada', async () => {
-    //expect(alertMessage).toBe('Please fill out Name and Creditcard.');
-    expect(alertMessage).toBe('Mensaje que no existe');
+    expect(alertMessage).toBe('Please fill out Name and Creditcard.');
+    //expect(alertMessage).toBe('Mensaje que no existe');
     await modal.expectNoConfirmation();
   });
 });

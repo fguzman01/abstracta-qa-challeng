@@ -12,15 +12,20 @@ test('Escenario A: crear 10 mascotas por estado y obtener la vendida', async ({ 
   const createdPets: Pet[] = [];
 
   await test.step('Crear mascotas según la distribución de estados', async () => {
-    for (const [status, quantity] of Object.entries(PET_DISTRIBUTION) as [PetStatus, number][]) {
-      for (let i = 0; i < quantity; i++) {
-        const pet = buildPet({ status });
-        const response = await petClient.create(pet);
-        expect(response).toBeOK();
-        createdPets.push(pet);
-      }
+  const petsToCreate: Pet[] = [];
+  for (const [status, quantity] of Object.entries(PET_DISTRIBUTION) as [PetStatus, number][]) {
+    for (let i = 0; i < quantity; i++) {
+      petsToCreate.push(buildPet({ status }));
     }
-    expect(createdPets).toHaveLength(10);
+  }
+
+  const responses = await Promise.all(petsToCreate.map((pet) => petClient.create(pet)));
+
+  for (const response of responses) {
+    await expect(response).toBeOK();
+  }
+  createdPets.push(...petsToCreate);
+  expect(createdPets).toHaveLength(10);
   });
 
   await test.step('Obtener los detalles de la mascota vendida', async () => {
@@ -30,10 +35,10 @@ test('Escenario A: crear 10 mascotas por estado y obtener la vendida', async ({ 
     }
 
     const response = await petClient.getById(soldPet.id);
-    expect(response).toBeOK();
+    await expect(response).toBeOK();
 
     const body: Pet = await response.json();
-    expect(body).toMatchObject({ id: soldPet.id, name: soldPet.name, status: 'sold' });
+    await expect(body).toMatchObject({ id: soldPet.id, name: soldPet.name, status: 'sold' });
 
     await test.info().attach('sold-pet', {
       body: JSON.stringify(body, null, 2),

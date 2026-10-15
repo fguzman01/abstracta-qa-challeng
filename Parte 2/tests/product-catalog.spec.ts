@@ -24,13 +24,14 @@ test('Escenario A: obtener productos de las primeras 2 páginas y generar archiv
 
   await test.step('Validar datos y generar archivo', async () => {
     for (const product of allProducts) {
-      expect(product.name, 'Nombre vacío').not.toBe('');
-      expect(product.price, `Precio inválido en ${product.name}`).toBeGreaterThan(0);
-      expect(product.link).toContain('prod.html');
+        expect(product.name, 'Nombre vacío').not.toBe('');
+        expect(product.price, `Precio inválido en ${product.name}`).toBeGreaterThan(0);
+        expect(product.link).toContain('prod.html');
     }
 
     const env = process.env.ENV ?? 'staging';
-    const filePath = writeProductsFile(allProducts, `products-${env}.txt`);
+    const browser = test.info().project.name;
+    const filePath = writeProductsFile(allProducts, `products-${env}-${browser}.txt`);
     await test.info().attach('products', { path: filePath, contentType: 'text/plain' });
-  });
+    });
 });

@@ -87,3 +87,62 @@ Para agregar pruebas de un recurso nuevo (ej: `user`): crear su type, su client 
 
 - Validación de schema en runtime (`zod` o `ajv`) para detectar respuestas que no cumplen el contrato.
 - Limpieza automática de los datos creados en el teardown del fixture.
+
+## Parte 3 - Reporting con Allure
+
+### Reporte elegido
+
+**Allure 3** (`allure-playwright` + CLI `allure`), adicional al reporte HTML nativo de Playwright.
+
+Se eligió Allure 3 porque funciona solo con Node.js: a diferencia de Allure 2, no requiere Java, y alcanza con `npm install` para usarlo.
+
+### Qué muestra
+
+- Tests ejecutados, resultado (pass/fail) y duración
+- Pasos de cada test (`test.step`)
+- Adjuntos JSON con las respuestas de la API
+- Ambiente y URL base de la ejecución (portada del reporte)
+- **Evidencia de fallo:** trace de Playwright con cada request y response HTTP. En pruebas de API no aplican screenshot ni video, porque no hay interfaz; la evidencia útil es el tráfico HTTP.
+
+### Cambios en el framework
+
+- `playwright.config.ts`: se agregaron los reporters `list`, `html` (sin apertura automática) y `allure-playwright`, y `trace: 'retain-on-failure'`.
+- `package.json`: scripts para generar y abrir el reporte, y limpieza automática de resultados antes de cada ejecución (`pretest:stg` / `pretest:prod`), para que el reporte no mezcle corridas anteriores.
+
+### Cómo generar y ver el reporte
+
+```bash
+npm run test:stg          # ejecuta los tests (limpia resultados anteriores)
+npm run report:generate   # genera el HTML en ./allure-report
+npm run report:open       # abre el reporte en el navegador
+```
+
+## Parte 4.1 - Paralelización
+
+### Estrategia
+
+Paralelización **por test** (`fullyParallel: true`): cada test se asigna a un worker de forma independiente, no solo cada archivo.
+
+Además se paralelizó **dentro** del test más lento: el escenario A crea sus 10 mascotas con requests simultáneos (`Promise.all`) en lugar de una por una.
+
+### Aislamiento de datos
+
+- Cada mascota y orden se crea con un id único (`timestamp × 1000 + random`), por lo que tests en paralelo nunca escriben sobre el mismo registro.
+- Cada test crea sus propios datos y no depende del orden de ejecución ni de datos creados por otro test.
+- El escenario B solo **lee** datos compartidos (mascotas disponibles) y crea órdenes con ids propios.
+
+### Cambios realizados
+
+- `playwright.config.ts`: `workers: process.env.CI ? 2 : undefined` (en local, Playwright usa la mitad de los núcleos disponibles). En CI se limita a 2 por los núcleos del runner y para no saturar una API pública (riesgo de HTTP 429).
+- `pet-creation.spec.ts`: creación de mascotas con `Promise.all`.
+- `store-orders.spec.ts`: reintento del listado de mascotas (`toPass`) ante errores 500 intermitentes de la API pública, que aparecieron con más frecuencia al ejecutar en paralelo.
+
+### Impacto en tiempo (4 tests, promedio de 3 corridas)
+
+| Ejecución | Tiempo | vs. secuencial |
+|---|---|---|
+| Secuencial (1 worker) | 5.3 s | — |
+| Paralelo (4 workers) | 2.9 s | 45% menos |
+| Paralelo + `Promise.all` en escenario A | 2.4 s | **55% menos** |
+
+**Conclusión:** en paralelo, el tiempo total queda limitado por el test más lento. Agregar workers bajó el tiempo a 2.9 s, pero la última mejora vino de optimizar el escenario A, que tardaba 2.4 s por crear las mascotas de a una.
