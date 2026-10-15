@@ -104,3 +104,56 @@ jobs:
           name: playwright-report-ui-${{ env.ENV }}
           path: 'Parte 2/playwright-report'
           retention-days: 14
+
+  publish-reports:
+    name: Publicar reportes en GitHub Pages
+    needs: [api-tests, ui-tests]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Descargar reporte API
+        uses: actions/download-artifact@v8
+        with:
+          name: allure-report-api-${{ env.ENV }}
+          path: site/api
+
+      - name: Descargar reporte UI
+        uses: actions/download-artifact@v8
+        with:
+          name: allure-report-ui-${{ env.ENV }}
+          path: site/ui
+
+      - name: Crear página índice
+        run: |
+          cat > site/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="es">
+          <head><meta charset="utf-8"><title>Reportes - Abstracta QA Challenge</title></head>
+          <body style="font-family: sans-serif; max-width: 600px; margin: 40px auto;">
+            <h1>Reportes de pruebas</h1>
+            <p>Ambiente: <strong>${{ env.ENV }}</strong> · Generado: $(date -u '+%Y-%m-%d %H:%M UTC')</p>
+            <ul>
+              <li><a href="api/">Parte 1 - API (Allure)</a></li>
+              <li><a href="ui/">Parte 2 - UI (Allure)</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Subir sitio
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
