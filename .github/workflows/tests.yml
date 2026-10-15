@@ -1,0 +1,106 @@
+name: Tests
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente a ejecutar'
+        type: choice
+        options: [staging, production]
+        default: staging
+
+env:
+  ENV: ${{ inputs.environment || 'staging' }}
+
+jobs:
+  api-tests:
+    name: Parte 1 - API
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: 'Parte 1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Instalar Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: 'Parte 1/package-lock.json'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar tests
+        run: npx playwright test
+
+      - name: Generar reporte Allure
+        if: ${{ !cancelled() }}
+        run: npm run report:generate
+
+      - name: Publicar reporte Allure
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report-api-${{ env.ENV }}
+          path: 'Parte 1/allure-report'
+          retention-days: 14
+
+      - name: Publicar reporte Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-api-${{ env.ENV }}
+          path: 'Parte 1/playwright-report'
+          retention-days: 14
+
+  ui-tests:
+    name: Parte 2 - UI
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: 'Parte 2'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Instalar Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: 'Parte 2/package-lock.json'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar browsers
+        run: npx playwright install --with-deps
+
+      - name: Ejecutar tests
+        run: npx playwright test
+
+      - name: Generar reporte Allure
+        if: ${{ !cancelled() }}
+        run: npm run report:generate
+
+      - name: Publicar reporte Allure
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report-ui-${{ env.ENV }}
+          path: 'Parte 2/allure-report'
+          retention-days: 14
+
+      - name: Publicar reporte Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-ui-${{ env.ENV }}
+          path: 'Parte 2/playwright-report'
+          retention-days: 14
