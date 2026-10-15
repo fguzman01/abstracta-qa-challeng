@@ -1,0 +1,36 @@
+ID;Endpoint;Método;Tipo;Título;Precondiciones;Datos de entrada;Resultado esperado;Prioridad;Supuesto
+STO-001;/store/inventory;GET;Positivo;Obtener inventario por status;Header api_key válido;Sin parámetros;200. Body objeto JSON donde cada clave es string y cada valor es entero int32 mayor o igual a 0;Alta;Se asume que las cantidades no son negativas
+STO-002;/store/inventory;GET;Positivo;Inventario refleja una mascota recién creada;Header api_key válido. Leer inventario y luego crear una mascota con status available;Sin parámetros;200. El valor de la clave available es mayor o igual al valor previo más 1;Baja;Se asume que el inventario cuenta mascotas por status. En una API compartida otros usuarios pueden alterar el conteo
+STO-003;/store/inventory;GET;Borde;Solicitar inventario en XML;Header api_key válido;Accept application/xml;Respuesta en application/json o rechazo del Accept;Baja;El endpoint solo produce application/json. La respuesta para otro Accept no está documentada
+STO-004;/store/inventory;GET;Seguridad;Obtener inventario sin api_key;Ninguna;Sin header api_key;401;Alta;La spec declara api_key pero no documenta la respuesta sin credencial. Se asume 401
+STO-005;/store/inventory;GET;Seguridad;Obtener inventario con api_key inválida;Ninguna;Header api_key = clave-invalida;401;Media;Se asume 401 (no documentado)
+STO-006;/store/order;POST;Positivo;Crear orden con todos los campos válidos;Ninguna. Id de orden único entre 1 y 10 para poder consultarla luego;Body JSON {id: 7, petId: 1, quantity: 2, shipDate: '2026-10-15T10:00:00.000Z', status: 'placed', complete: false};200. Body Order con id, petId, quantity, shipDate, status y complete iguales a los enviados;Alta;
+STO-007;/store/order;POST;Positivo;Crear orden con cada valor del enum status;Ninguna;Body válido con status = placed / approved / delivered (parametrizado);200. Body Order con el status enviado;Media;
+STO-008;/store/order;POST;Borde;Crear orden con body vacío;Ninguna;Body JSON {};200. Body Order con id asignado;Baja;Order no declara campos requeridos. Se asume 200
+STO-009;/store/order;POST;Negativo;Crear orden con JSON mal formado;Ninguna;Body truncado {id: 1, petId: ;400 Invalid Order;Alta;
+STO-010;/store/order;POST;Borde;Crear orden con status fuera del enum;Ninguna;Body válido con status: 'cancelled';400 Invalid Order;Alta;
+STO-011;/store/order;POST;Negativo;Crear orden con tipo incorrecto en quantity;Ninguna;Body válido con quantity: 'abc';400 Invalid Order;Media;
+STO-012;/store/order;POST;Borde;Crear orden con quantity 0;Ninguna;Body válido con quantity: 0;400 Invalid Order;Media;La spec no define minimum para quantity. Se asume que una orden debe tener al menos 1 unidad
+STO-013;/store/order;POST;Borde;Crear orden con quantity negativa;Ninguna;Body válido con quantity: -1;400 Invalid Order;Media;Se asume que cantidades negativas son inválidas
+STO-014;/store/order;POST;Borde;Crear orden con quantity máximo int32;Ninguna;Body válido con quantity: 2147483647;200. Body quantity = 2147483647;Baja;Se asume que el valor máximo de int32 se acepta
+STO-015;/store/order;POST;Borde;Crear orden con quantity que excede int32;Ninguna;Body válido con quantity: 2147483648;400 Invalid Order;Media;
+STO-016;/store/order;POST;Negativo;Crear orden con shipDate en formato inválido;Ninguna;Body válido con shipDate: '2026-13-45';400 Invalid Order;Media;Se asume que el formato date-time se valida en el servidor
+STO-017;/store/order;POST;Negativo;Crear orden para una mascota inexistente;Ninguna. petId que no existe;Body válido con petId: <idInexistente>;400 Invalid Order;Media;La spec no indica si petId debe referenciar una mascota existente. Se asume validación
+STO-018;/store/order;POST;Negativo;Crear orden con Content-Type XML;Ninguna;Content-Type application/xml con un Order en XML;400 Invalid Order;Baja;El endpoint solo consume application/json. Se asume 400
+STO-019;/store/order;POST;Borde;Crear orden con id fuera del rango consultable;Ninguna;Body válido con id: 11;200. Luego GET /store/order/11 devuelve 400 Invalid ID supplied;Media;POST no restringe el id pero GET solo acepta 1 a 10. Se asume que la orden se crea pero no se puede consultar
+STO-020;/store/order/{orderId};GET;Positivo;Obtener orden existente;Orden creada con id en rango 1 a 10;orderId = id creado;200. Body Order con id igual al solicitado y los campos enviados al crearla;Alta;En una API compartida otra ejecución puede sobrescribir la orden. Validar inmediatamente después de crearla
+STO-021;/store/order/{orderId};GET;Borde;Obtener orden en los límites del rango;Órdenes creadas con id 1 y id 10;orderId = 1 y orderId = 10 (parametrizado);200. Body Order con el id solicitado;Alta;
+STO-022;/store/order/{orderId};GET;Borde;Obtener orden con id 0 (debajo del mínimo);Ninguna;orderId = 0;400 Invalid ID supplied;Alta;La spec dice que otros valores generan excepciones sin precisar el código. Se asume 400
+STO-023;/store/order/{orderId};GET;Borde;Obtener orden con id 11 (encima del máximo);Ninguna;orderId = 11;400 Invalid ID supplied;Alta;Se asume 400
+STO-024;/store/order/{orderId};GET;Negativo;Obtener orden con id negativo;Ninguna;orderId = -1;400 Invalid ID supplied;Media;
+STO-025;/store/order/{orderId};GET;Negativo;Obtener orden con id no numérico;Ninguna;orderId = abc;400 Invalid ID supplied;Media;
+STO-026;/store/order/{orderId};GET;Negativo;Obtener orden inexistente dentro del rango;Orden con id en rango eliminada previamente;orderId = id eliminado;404 Order not found;Alta;
+STO-027;/store/order/{orderId};GET;Positivo;Obtener orden en formato XML;Orden creada con id en rango;orderId = id creado. Accept application/xml;200. Content-Type application/xml con raíz Order;Baja;
+STO-028;/store/order/{orderId};DELETE;Positivo;Eliminar orden existente;Orden creada con id en rango;orderId = id creado;200. GET /store/order/{id} posterior devuelve 404;Alta;La spec solo documenta 400 y 404. Se asume 200
+STO-029;/store/order/{orderId};DELETE;Negativo;Eliminar orden inexistente;Orden con ese id eliminada previamente;orderId = id eliminado;404 Order not found;Alta;
+STO-030;/store/order/{orderId};DELETE;Borde;Eliminar orden con id 0 (debajo del mínimo);Ninguna;orderId = 0;400 Invalid ID supplied;Media;
+STO-031;/store/order/{orderId};DELETE;Negativo;Eliminar orden con id negativo;Ninguna;orderId = -1;400 Invalid ID supplied;Media;
+STO-032;/store/order/{orderId};DELETE;Negativo;Eliminar orden con id no numérico;Ninguna;orderId = abc;400 Invalid ID supplied;Media;
+STO-033;/store/order/{orderId};DELETE;Borde;Eliminar orden con id mayor a 10;Orden creada con id único mayor a 10 (ej. 900001);orderId = id creado;200;Media;DELETE solo define minimum 1 a diferencia de GET. Se asume que ids mayores a 10 son válidos para eliminar
+STO-034;/store/order/{orderId};DELETE;Borde;Eliminar orden con id máximo int64 inexistente;Ninguna;orderId = 9223372036854775807;404 Order not found;Baja;Se asume que no existe una orden con ese id
+STO-035;/store/order/{orderId};DELETE;Seguridad;Eliminar orden sin credenciales;Orden creada;Sin header de autenticación;200. La orden queda eliminada;Media;La spec no declara security en los endpoints de órdenes. Se documenta que cualquier cliente anónimo puede eliminar órdenes

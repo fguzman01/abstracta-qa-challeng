@@ -1,0 +1,35 @@
+ID;Tipo;Request;Status esperado;Status real;Coincide;Extracto del body
+PET-001;Positivo;POST /pet (Pet completo sin token);200;200;Sí;{"id":1792101267664462,"category":{"id":1,"name":"dogs"},"name":"doggie","photoUrls":["https://img/1.png"],"tags":[{"id":1,"name":"tag1"}],"status":"available"}
+PET-016;Positivo;PUT /pet (id propio name doggie-upd status sold);200;200;Sí;{"id":1792101268551714,"category":{"id":1,"name":"dogs"},"name":"doggie-upd","photoUrls":["https://img/1.png"],"tags":[{"id":1,"name":"tag1"}],"status":"sold"}
+PET-035;Positivo;POST /pet/{id} form name=doggie-form status=pending;200;200;Sí;{"code":200,"type":"unknown","message":"1792101269484814"}
+PET-042;Positivo;DELETE /pet/{id} (mascota propia);200;200;Sí;{"code":200,"type":"unknown","message":"1792101270169598"}
+STO-028;Positivo;DELETE /store/order/{id} (orden propia);200;200;Sí;{"code":200,"type":"unknown","message":"1792101270854960"}
+USR-009;Positivo;POST /user/createWithArray (2 usuarios);200;200;Sí;{"code":200,"type":"unknown","message":"ok"}
+USR-040;Borde;GET /user/logout (sin sesión);200;200;Sí;{"code":200,"type":"unknown","message":"ok"}
+PET-014;Seguridad;POST /pet sin header Authorization;401;200;No;{"id":1792101272803627,"category":{"id":1,"name":"dogs"},"name":"doggie","photoUrls":["https://img/1.png"],"tags":[{"id":1,"name":"tag1"}],"status":"available"}
+PET-033;Seguridad;GET /pet/{id} sin header api_key;401;200;No;{"id":1792101273241582,"category":{"id":1,"name":"dogs"},"name":"doggie","photoUrls":["https://img/1.png"],"tags":[{"id":1,"name":"tag1"}],"status":"available"}
+PET-047;Seguridad;DELETE /pet/{id} sin token ni api_key;401;200;No;{"code":200,"type":"unknown","message":"1792101273929327"}
+STO-004;Seguridad;GET /store/inventory sin api_key;401;200;No;{"sold":213,"AAA":1,"string":113,"sold ":1,"NOT available":1,"d":1,"pending":91,"weisskeiner1":1,"available":271,"avalible":1,"availabl":1,"0":1,"null":2,"available, sold":1,"avaliable":1,"0.5":1,"tru
+USR-008;Seguridad;POST /user sin sesión iniciada;401;200;No;{"code":200,"type":"unknown","message":"9223372036854761803"}
+PET-003;Negativo;POST /pet sin name;405;200;No;{"id":1792101275486635,"photoUrls":["https://img/1.png"],"tags":[]}
+PET-058;Negativo;GET /pet/findByStatus sin query status;400;200;No;[]
+PET-007;Borde;POST /pet status='unknown';405;200;No;{"id":1792101276356979,"category":{"id":1,"name":"dogs"},"name":"doggie","photoUrls":["https://img/1.png"],"tags":[{"id":1,"name":"tag1"}],"status":"unknown"}
+PET-059;Borde;GET /pet/findByStatus?status=unknown;400;200;No;[{"id":1792101276356979,"category":{"id":1,"name":"dogs"},"name":"doggie","photoUrls":["https://img/1.png"],"tags":[{"id":1,"name":"tag1"}],"status":"unknown"}]
+STO-010;Borde;POST /store/order status='cancelled';400;200;No;{"id":1792101277225237,"petId":1,"quantity":1,"status":"cancelled","complete":false}
+PET-006;Negativo;POST /pet id='abc';405;500;No;{"code":500,"type":"unknown","message":"something bad happened"}
+STO-011;Negativo;POST /store/order quantity='abc';400;500;No;{"code":500,"type":"unknown","message":"something bad happened"}
+PET-027;Negativo;GET /pet/abc;400;404;No;{"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"abc\""}
+PET-029;Borde;GET /pet/-1;400;404;No;{"code":1,"type":"error","message":"Pet not found"}
+STO-023;Borde;GET /store/order/11;400;404;No;{"code":1,"type":"error","message":"Order not found"}
+PET-010;Borde;POST /pet id=9223372036854775807;200;0;No;OMITIDO: ya existe una mascota ajena con ese id
+PET-026;Negativo;GET /pet/{idInexistente};404;404;Sí;{"code":1,"type":"error","message":"Pet not found"}
+USR-017;Negativo;GET /user/{usernameInexistente};404;404;Sí;{"code":1,"type":"error","message":"User not found"}
+PET-005;Negativo;POST /pet con JSON truncado;405;500;No;{"code":500,"type":"unknown","message":"something bad happened"}
+USR-004;Negativo;POST /user userStatus='activo';400;500;No;{"code":500,"type":"unknown","message":"something bad happened"}
+STO-016;Negativo;POST /store/order shipDate='2026-13-45';400;200;No;{"id":1792101282018716,"petId":1,"quantity":1,"shipDate":"2027-02-14T00:00:00.000+0000","status":"placed","complete":false}
+PET-044;Negativo;DELETE /pet/abc;400;404;No;{"code":404,"type":"unknown","message":"java.lang.NumberFormatException: For input string: \"abc\""}
+STO-022;Borde;GET /store/order/0;400;404;No;{"code":1,"type":"error","message":"Order not found"}
+PET-066;Negativo;GET /pet/findByTags sin query tags;400;200;No;[]
+USR-035;Negativo;GET /user/login solo con password;400;200;No;{"code":200,"type":"unknown","message":"logged in user session:1792101283941"}
+USR-033;Negativo;GET /user/login con password incorrecta;400;200;No;{"code":200,"type":"unknown","message":"logged in user session:1792101285013"}
+USR-034;Negativo;GET /user/login con usuario inexistente;400;200;No;{"code":200,"type":"unknown","message":"logged in user session:1792101285452"}

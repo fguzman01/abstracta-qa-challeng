@@ -1,0 +1,146 @@
+ID;Endpoint;Método;Tipo;Título;Prioridad;Verificado;Status esperado (IA);Status real;Clasificación;Justificación
+PET-001;/pet;POST;Positivo;Crear mascota con todos los campos válidos;Alta;Sí;200;200;Automatizar;Positivo con supuesto de éxito verificado: 200 y el body devuelve el Pet enviado.
+PET-002;/pet;POST;Positivo;Crear mascota solo con campos requeridos;Media;Por analogía;200;-;Automatizar;Análogo a PET-001. Leer el id asignado del body para poder limpiar.
+PET-003;/pet;POST;Negativo;Crear mascota sin el campo requerido name;Alta;Sí;405;200;Hallazgo;name es requerido y POST /pet documenta 405 Invalid input, pero la API guarda el Pet sin name (200).
+PET-004;/pet;POST;Negativo;Crear mascota sin el campo requerido photoUrls;Alta;Por analogía;405;-;Hallazgo;photoUrls es requerido y se documenta 405. Por analogía con PET-003 la API no valida requeridos.
+PET-005;/pet;POST;Negativo;Crear mascota con JSON mal formado;Alta;Sí;405;500;Hallazgo;JSON truncado devuelve 500 "something bad happened" en vez del 405 documentado.
+PET-006;/pet;POST;Negativo;Crear mascota con tipo incorrecto en id;Media;Sí;405;500;Hallazgo;Tipo incorrecto en id devuelve 500 "something bad happened" en vez de un 4xx de validación.
+PET-007;/pet;POST;Borde;Crear mascota con status fuera del enum;Media;Sí;405;200;Hallazgo;Enum declarado y 405 documentado, pero la API guarda status=unknown (200). Mismo criterio que PET-021.
+PET-008;/pet;POST;Borde;Crear mascota con name vacío;Baja;Por analogía;405;-;Pregunta al negocio;La API no valida requeridos (PET-003). La spec no define minLength para name.
+PET-009;/pet;POST;Borde;Crear mascota con photoUrls vacío;Baja;Por analogía;405;-;Pregunta al negocio;La API no valida requeridos (PET-003). La spec no define minItems para photoUrls.
+PET-010;/pet;POST;Borde;Crear mascota con id máximo int64;Media;No ejecutado;200;-;Automatizar con ajuste;Id fijo ocupado por otro usuario. Usar un id único cercano a 2^63 y comparar el id como string o BigInt.
+PET-011;/pet;POST;Borde;Crear mascota con id que excede int64;Media;Por analogía;405;-;Hallazgo;Por analogía con PET-006 se espera 5xx. Confirmar: STO-016 mostró que algunos valores inválidos se aceptan en silencio.
+PET-012;/pet;POST;Positivo;Crear mascota con body XML;Media;Por analogía;200;-;Automatizar;Positivo análogo a PET-001 con XML.
+PET-013;/pet;POST;Negativo;Crear mascota con Content-Type no soportado;Baja;Por analogía;405;-;Automatizar con ajuste;Código no documentado para Content-Type no soportado. Confirmar el código real antes de fijar el esperado.
+PET-014;/pet;POST;Seguridad;Crear mascota sin token OAuth2;Alta;Sí;401;200;Pregunta al negocio;Sin token la API crea la mascota (200). La spec declara OAuth2 pero no define el rechazo.
+PET-015;/pet;POST;Seguridad;Crear mascota con token sin scope write:pets;Media;Por analogía;403;-;Pregunta al negocio;Análogo a PET-014: la API no exige token, menos aún scopes.
+PET-016;/pet;PUT;Positivo;Actualizar mascota existente;Alta;Sí;200;200;Automatizar;Positivo con supuesto de éxito verificado: 200 con name y status actualizados.
+PET-017;/pet;PUT;Negativo;Actualizar mascota inexistente;Alta;Por analogía;404;-;Automatizar;404 documentado. Análogo al control PET-026.
+PET-018;/pet;PUT;Negativo;Actualizar mascota con id de tipo incorrecto;Alta;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con PET-006 un id no numérico en el body produce 500.
+PET-019;/pet;PUT;Borde;Actualizar mascota con id negativo;Media;Por analogía;400;-;Automatizar con ajuste;Id negativo no se trata como inválido (PET-029). Confirmar el código real y ajustar el esperado.
+PET-020;/pet;PUT;Negativo;Actualizar mascota sin campo requerido name;Alta;Por analogía;405;-;Hallazgo;405 Validation exception documentado pero la API acepta Pets sin name (PET-003).
+PET-021;/pet;PUT;Borde;Actualizar mascota con status fuera del enum;Media;Por analogía;405;-;Hallazgo;405 Validation exception documentado pero la API acepta status fuera del enum (PET-007).
+PET-022;/pet;PUT;Negativo;Actualizar mascota con JSON mal formado;Media;Por analogía;405;-;Hallazgo;Patrón confirmado en PET-005: un body no parseable devuelve 500.
+PET-023;/pet;PUT;Seguridad;Actualizar mascota sin token OAuth2;Alta;Por analogía;401;-;Pregunta al negocio;Análogo a PET-014: la API no exige autenticación.
+PET-024;/pet/{petId};GET;Positivo;Obtener mascota existente por id;Alta;Por analogía;200;-;Automatizar;200 documentado. Verificado indirectamente en PET-033.
+PET-025;/pet/{petId};GET;Positivo;Obtener mascota en formato XML;Baja;Por analogía;200;-;Automatizar;200 documentado con produces application/xml.
+PET-026;/pet/{petId};GET;Negativo;Obtener mascota inexistente;Alta;Sí;404;404;Automatizar;Control: 404 Pet not found documentado y verificado.
+PET-027;/pet/{petId};GET;Negativo;Obtener mascota con id no numérico;Alta;Sí;400;404;Hallazgo;Spec documenta 400 pero devuelve 404 y expone java.lang.NumberFormatException en el body.
+PET-028;/pet/{petId};GET;Borde;Obtener mascota con id 0;Media;Por analogía;404;-;Automatizar con ajuste;Otro usuario puede crear el id 0. Verificar con GET previo y omitir si existe.
+PET-029;/pet/{petId};GET;Borde;Obtener mascota con id negativo;Media;Sí;400;404;Automatizar con ajuste;El -1 no se trata como inválido: devuelve 404 Pet not found. Ajustar el esperado a 404.
+PET-030;/pet/{petId};GET;Borde;Obtener mascota con id máximo int64 inexistente;Baja;Por analogía;404;-;Descartar;No determinista: ya existe una mascota ajena con id int64 máximo (evidencia de PET-010).
+PET-031;/pet/{petId};GET;Borde;Obtener mascota con id que excede int64;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con PET-027 un id no parseable devuelve 404 con excepción interna.
+PET-032;/pet/{petId};GET;Borde;Obtener mascota con id decimal;Baja;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con PET-027 un id decimal devuelve 404 con excepción interna.
+PET-033;/pet/{petId};GET;Seguridad;Obtener mascota sin api_key;Alta;Sí;401;200;Pregunta al negocio;Sin api_key la API devuelve la mascota (200). La spec declara api_key pero no define el rechazo.
+PET-034;/pet/{petId};GET;Seguridad;Obtener mascota con api_key inválida;Media;Por analogía;401;-;Pregunta al negocio;Análogo a PET-033: la API no valida la api_key.
+PET-035;/pet/{petId};POST;Positivo;Actualizar name y status por form data;Alta;Sí;200;200;Automatizar;Positivo con supuesto de éxito verificado: 200 al actualizar por form.
+PET-036;/pet/{petId};POST;Borde;Actualizar por form sin enviar campos;Baja;Por analogía;200;-;Automatizar;Ambos campos son opcionales. Análogo a PET-035.
+PET-037;/pet/{petId};POST;Negativo;Actualizar por form una mascota inexistente;Media;Por analogía;404;-;Automatizar con ajuste;La spec solo documenta 405. Confirmar el código real para mascota inexistente.
+PET-038;/pet/{petId};POST;Negativo;Actualizar por form con petId no numérico;Media;Por analogía;405;-;Hallazgo;Por analogía con PET-027 un petId no numérico devuelve 404 con excepción interna.
+PET-039;/pet/{petId};POST;Borde;Actualizar por form con status fuera del enum;Media;Por analogía;405;-;Pregunta al negocio;El status del form es string libre en la spec y la API no valida enums (PET-007).
+PET-040;/pet/{petId};POST;Negativo;Actualizar con body JSON en vez de form data;Baja;Por analogía;405;-;Automatizar con ajuste;Código no documentado para Content-Type incorrecto. Confirmar el código real.
+PET-041;/pet/{petId};POST;Seguridad;Actualizar por form sin token OAuth2;Alta;Por analogía;401;-;Pregunta al negocio;Análogo a PET-014: la API no exige autenticación.
+PET-042;/pet/{petId};DELETE;Positivo;Eliminar mascota existente;Alta;Sí;200;200;Automatizar;Positivo con supuesto de éxito verificado: 200 al eliminar.
+PET-043;/pet/{petId};DELETE;Negativo;Eliminar mascota inexistente;Alta;Por analogía;404;-;Automatizar;404 documentado. Análogo al control PET-026.
+PET-044;/pet/{petId};DELETE;Negativo;Eliminar mascota con id no numérico;Media;Sí;400;404;Hallazgo;Spec documenta 400 pero devuelve 404 y expone java.lang.NumberFormatException en el body.
+PET-045;/pet/{petId};DELETE;Borde;Eliminar mascota con id negativo;Baja;Por analogía;400;-;Automatizar con ajuste;Análogo a PET-029: el -1 no se trata como inválido. Ajustar el esperado a 404.
+PET-046;/pet/{petId};DELETE;Positivo;Eliminar mascota enviando el header opcional api_key;Baja;Por analogía;200;-;Descartar;Equivalente a PET-042: la API ignora credenciales, el header api_key no cambia el resultado.
+PET-047;/pet/{petId};DELETE;Seguridad;Eliminar mascota sin token OAuth2;Alta;Sí;401;200;Pregunta al negocio;Sin credenciales la API elimina la mascota (200). Riesgo alto: cualquiera puede borrar datos.
+PET-048;/pet/{petId}/uploadImage;POST;Positivo;Subir imagen con metadata;Alta;Por analogía;200;-;Automatizar;Positivo análogo a otros éxitos verificados. Validar solo el esquema de ApiResponse.
+PET-049;/pet/{petId}/uploadImage;POST;Positivo;Subir imagen sin additionalMetadata;Media;Por analogía;200;-;Descartar;Bajo valor: queda cubierto por PET-048 y PET-050.
+PET-050;/pet/{petId}/uploadImage;POST;Borde;Subir sin file ni metadata;Baja;Por analogía;200;-;Automatizar con ajuste;Ambos campos son opcionales y solo se documenta 200. Confirmar el código real sin archivo.
+PET-051;/pet/{petId}/uploadImage;POST;Borde;Subir un archivo que no es imagen;Baja;Por analogía;200;-;Pregunta al negocio;La spec no restringe el tipo de archivo. Definir si se aceptan archivos que no son imagen.
+PET-052;/pet/{petId}/uploadImage;POST;Negativo;Subir imagen a mascota inexistente;Media;Por analogía;404;-;Automatizar con ajuste;La spec solo documenta 200. Confirmar el código real para mascota inexistente.
+PET-053;/pet/{petId}/uploadImage;POST;Negativo;Subir imagen con petId no numérico;Media;Por analogía;400;-;Hallazgo;Por analogía con PET-027 un petId no numérico devuelve 404 con excepción interna.
+PET-054;/pet/{petId}/uploadImage;POST;Seguridad;Subir imagen sin token OAuth2;Alta;Por analogía;401;-;Pregunta al negocio;Análogo a PET-014: la API no exige autenticación.
+PET-055;/pet/findByStatus;GET;Positivo;Buscar mascotas por cada valor del enum status;Alta;Por analogía;200;-;Automatizar con ajuste;Validar solo el status de cada Pet, no el esquema: otros usuarios guardan Pets sin name (PET-003).
+PET-056;/pet/findByStatus;GET;Positivo;Buscar mascotas por múltiples status;Alta;Por analogía;200;-;Automatizar con ajuste;Igual que PET-055: validar solo el status, no el esquema completo de datos ajenos.
+PET-057;/pet/findByStatus;GET;Positivo;Búsqueda incluye una mascota recién creada;Media;Por analogía;200;-;Automatizar;Determinista: busca el id propio en el resultado.
+PET-058;/pet/findByStatus;GET;Negativo;Buscar sin el parámetro requerido status;Alta;Sí;400;200;Hallazgo;Sin status devuelve 200 con []: no aplica ni el 400 documentado ni el default available.
+PET-059;/pet/findByStatus;GET;Borde;Buscar con status fuera del enum;Alta;Sí;400;200;Hallazgo;400 Invalid status value documentado pero devuelve 200 con Pets guardados con status=unknown.
+PET-060;/pet/findByStatus;GET;Borde;Buscar con status vacío;Media;Por analogía;400;-;Hallazgo;Análogo a PET-059: un valor fuera del enum no devuelve el 400 documentado.
+PET-061;/pet/findByStatus;GET;Borde;Buscar con status en mayúsculas;Baja;Por analogía;400;-;Pregunta al negocio;La spec no define si el enum distingue mayúsculas.
+PET-062;/pet/findByStatus;GET;Borde;Buscar con status separados por coma;Media;Por analogía;400;-;Pregunta al negocio;La spec se contradice: la descripción dice separado por comas y collectionFormat es multi.
+PET-063;/pet/findByStatus;GET;Seguridad;Buscar por status sin token OAuth2;Media;Por analogía;401;-;Pregunta al negocio;Análogo a PET-014: la API no exige autenticación.
+PET-064;/pet/findByTags;GET;Positivo;Buscar mascota por tag único;Media;Por analogía;200;-;Automatizar;Determinista con un tag único. Endpoint deprecated, prioridad baja.
+PET-065;/pet/findByTags;GET;Positivo;Buscar mascotas por múltiples tags;Baja;Por analogía;200;-;Automatizar;Determinista con tags únicos.
+PET-066;/pet/findByTags;GET;Negativo;Buscar sin el parámetro requerido tags;Media;Sí;400;200;Hallazgo;tags es requerido y se documenta 400, pero sin el parámetro devuelve 200 con [].
+PET-067;/pet/findByTags;GET;Borde;Buscar por tag inexistente;Baja;Por analogía;200;-;Automatizar;Determinista con un tag nunca usado.
+PET-068;/pet/findByTags;GET;Borde;Buscar con tag vacío;Baja;Por analogía;400;-;Pregunta al negocio;La spec no define si un tag vacío es inválido.
+PET-069;/pet/findByTags;GET;Seguridad;Buscar por tags sin token OAuth2;Baja;Por analogía;401;-;Pregunta al negocio;Análogo a PET-014: la API no exige autenticación.
+STO-001;/store/inventory;GET;Positivo;Obtener inventario por status;Alta;Por analogía;200;-;Automatizar;200 documentado. Validar tipos sin asumir claves: el inventario tiene status basura (AAA, null).
+STO-002;/store/inventory;GET;Positivo;Inventario refleja una mascota recién creada;Baja;Por analogía;200;-;Descartar;No determinista: el conteo global cambia con datos de otros usuarios.
+STO-003;/store/inventory;GET;Borde;Solicitar inventario en XML;Baja;Por analogía;-;-;Descartar;El resultado esperado no es verificable: acepta dos comportamientos distintos.
+STO-004;/store/inventory;GET;Seguridad;Obtener inventario sin api_key;Alta;Sí;401;200;Pregunta al negocio;Sin api_key la API devuelve el inventario (200). La spec declara api_key pero no define el rechazo.
+STO-005;/store/inventory;GET;Seguridad;Obtener inventario con api_key inválida;Media;Por analogía;401;-;Pregunta al negocio;Análogo a STO-004: la API no valida la api_key.
+STO-006;/store/order;POST;Positivo;Crear orden con todos los campos válidos;Alta;Por analogía;200;-;Automatizar con ajuste;Usa un id fijo (7) en una API compartida. Usar un id único y validar contra el body de la respuesta.
+STO-007;/store/order;POST;Positivo;Crear orden con cada valor del enum status;Media;Por analogía;200;-;Automatizar;Positivo parametrizado con ids únicos. 200 documentado.
+STO-008;/store/order;POST;Borde;Crear orden con body vacío;Baja;Por analogía;200;-;Automatizar;Order no tiene campos requeridos. Análogo a otros éxitos. Limpiar con el id devuelto.
+STO-009;/store/order;POST;Negativo;Crear orden con JSON mal formado;Alta;Por analogía;400;-;Hallazgo;400 Invalid Order documentado. Patrón confirmado en PET-005: un body no parseable devuelve 500.
+STO-010;/store/order;POST;Borde;Crear orden con status fuera del enum;Alta;Sí;400;200;Hallazgo;400 Invalid Order documentado pero la API guarda la orden con status=cancelled (200).
+STO-011;/store/order;POST;Negativo;Crear orden con tipo incorrecto en quantity;Media;Sí;400;500;Hallazgo;Tipo incorrecto en quantity devuelve 500 "something bad happened" en vez del 400 documentado.
+STO-012;/store/order;POST;Borde;Crear orden con quantity 0;Media;Por analogía;400;-;Pregunta al negocio;La spec no define minimum para quantity. Definir si 0 es válido.
+STO-013;/store/order;POST;Borde;Crear orden con quantity negativa;Media;Por analogía;400;-;Pregunta al negocio;La spec no define minimum para quantity. Definir si los negativos son válidos.
+STO-014;/store/order;POST;Borde;Crear orden con quantity máximo int32;Baja;Por analogía;200;-;Automatizar;Positivo de borde. Análogo a otros éxitos de creación.
+STO-015;/store/order;POST;Borde;Crear orden con quantity que excede int32;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con STO-011 se espera 500. Confirmar: STO-016 mostró aceptación silenciosa.
+STO-016;/store/order;POST;Negativo;Crear orden con shipDate en formato inválido;Media;Sí;400;200;Hallazgo;shipDate 2026-13-45 se acepta (200) y se guarda corrida como 2027-02-14: corrupción silenciosa de datos.
+STO-017;/store/order;POST;Negativo;Crear orden para una mascota inexistente;Media;Por analogía;400;-;Pregunta al negocio;La spec no indica si petId debe existir. Definir la regla de integridad.
+STO-018;/store/order;POST;Negativo;Crear orden con Content-Type XML;Baja;Por analogía;400;-;Automatizar con ajuste;Solo consume JSON. Confirmar el código real para XML antes de fijar el esperado.
+STO-019;/store/order;POST;Borde;Crear orden con id fuera del rango consultable;Media;Por analogía;200;-;Hallazgo;Por analogía con STO-023 GET no valida el máximo 10 documentado. Contradice la spec.
+STO-020;/store/order/{orderId};GET;Positivo;Obtener orden existente;Alta;Por analogía;200;-;Automatizar con ajuste;Los ids 1 a 10 se comparten con otros usuarios. Ejecutar solo en un entorno aislado.
+STO-021;/store/order/{orderId};GET;Borde;Obtener orden en los límites del rango;Alta;Por analogía;200;-;Automatizar con ajuste;Crear las órdenes 1 y 10 pisa datos ajenos. Ejecutar solo en un entorno aislado.
+STO-022;/store/order/{orderId};GET;Borde;Obtener orden con id 0 (debajo del mínimo);Alta;Sí;400;404;Hallazgo;minimum 1 y 400 documentados pero orderId 0 devuelve 404 Order not found: no valida el rango.
+STO-023;/store/order/{orderId};GET;Borde;Obtener orden con id 11 (encima del máximo);Alta;Sí;400;404;Hallazgo;maximum 10 y 400 documentados pero devuelve 404 Order not found: no valida el rango.
+STO-024;/store/order/{orderId};GET;Negativo;Obtener orden con id negativo;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con STO-023 la API no valida el rango.
+STO-025;/store/order/{orderId};GET;Negativo;Obtener orden con id no numérico;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con PET-027 devuelve 404 con excepción interna.
+STO-026;/store/order/{orderId};GET;Negativo;Obtener orden inexistente dentro del rango;Alta;Por analogía;404;-;Automatizar con ajuste;Eliminar una orden en el rango 1 a 10 afecta datos ajenos. Ejecutar solo en un entorno aislado.
+STO-027;/store/order/{orderId};GET;Positivo;Obtener orden en formato XML;Baja;Por analogía;200;-;Automatizar con ajuste;Requiere una orden en el rango compartido 1 a 10. Ejecutar solo en un entorno aislado.
+STO-028;/store/order/{orderId};DELETE;Positivo;Eliminar orden existente;Alta;Sí;200;200;Automatizar;Positivo con supuesto de éxito verificado: 200 al eliminar una orden propia.
+STO-029;/store/order/{orderId};DELETE;Negativo;Eliminar orden inexistente;Alta;Por analogía;404;-;Automatizar;404 documentado. Determinista con una orden propia ya eliminada.
+STO-030;/store/order/{orderId};DELETE;Borde;Eliminar orden con id 0 (debajo del mínimo);Media;Por analogía;400;-;Hallazgo;minimum 1 y 400 documentados. Por analogía con STO-023 la API no valida el rango.
+STO-031;/store/order/{orderId};DELETE;Negativo;Eliminar orden con id negativo;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con STO-023 la API no valida el rango.
+STO-032;/store/order/{orderId};DELETE;Negativo;Eliminar orden con id no numérico;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con PET-027 devuelve 404 con excepción interna.
+STO-033;/store/order/{orderId};DELETE;Borde;Eliminar orden con id mayor a 10;Media;Por analogía;200;-;Descartar;Equivalente a STO-028, que ya eliminó una orden propia con id mayor a 10.
+STO-034;/store/order/{orderId};DELETE;Borde;Eliminar orden con id máximo int64 inexistente;Baja;Por analogía;404;-;Descartar;Bajo valor y no determinista: no se puede asegurar que el id no exista.
+STO-035;/store/order/{orderId};DELETE;Seguridad;Eliminar orden sin credenciales;Media;Por analogía;200;-;Descartar;Equivalente a STO-028 (sin credenciales). Se lleva como pregunta de seguridad en el resumen.
+USR-001;/user;POST;Positivo;Crear usuario con todos los campos;Alta;Por analogía;200;-;Automatizar;Éxito verificado en USR-008 (POST /user devuelve 200). Validar con GET posterior.
+USR-002;/user;POST;Borde;Crear usuario con body vacío;Baja;Por analogía;200;-;Pregunta al negocio;La spec no define campos requeridos. Un usuario sin username tampoco se puede limpiar.
+USR-003;/user;POST;Negativo;Crear usuario con JSON mal formado;Media;Por analogía;400;-;Hallazgo;Patrón confirmado en PET-005: un body no parseable devuelve 500.
+USR-004;/user;POST;Negativo;Crear usuario con tipo incorrecto en userStatus;Media;Sí;400;500;Hallazgo;userStatus de tipo string devuelve 500 "something bad happened" en vez de un 4xx.
+USR-005;/user;POST;Borde;Crear usuario con userStatus que excede int32;Baja;Por analogía;400;-;Hallazgo;Por analogía con USR-004 se espera 500. Confirmar: STO-016 mostró aceptación silenciosa.
+USR-006;/user;POST;Borde;Crear usuario con username duplicado;Media;Por analogía;200;-;Pregunta al negocio;La spec no define la unicidad de username. Definir si se sobrescribe o se rechaza.
+USR-007;/user;POST;Borde;Crear usuario con email en formato inválido;Baja;Por analogía;200;-;Pregunta al negocio;La spec no define el formato de email. Definir si se valida.
+USR-008;/user;POST;Seguridad;Crear usuario sin sesión iniciada;Alta;Sí;401;200;Pregunta al negocio;Sin sesión la API crea el usuario (200). La descripción exige login pero no hay security.
+USR-009;/user/createWithArray;POST;Positivo;Crear varios usuarios con array;Alta;Sí;200;200;Automatizar;Positivo con supuesto de éxito verificado: 200 con message ok.
+USR-010;/user/createWithArray;POST;Borde;Crear usuarios con array vacío;Baja;Por analogía;200;-;Automatizar;Positivo de borde. Análogo a USR-009.
+USR-011;/user/createWithArray;POST;Negativo;Crear usuarios enviando un objeto en vez de array;Media;Por analogía;400;-;Hallazgo;Por analogía con PET-006 y STO-011 un body con forma incorrecta produce 500.
+USR-012;/user/createWithList;POST;Positivo;Crear varios usuarios con lista;Alta;Por analogía;200;-;Automatizar;Positivo. Análogo a USR-009 en el endpoint gemelo.
+USR-013;/user/createWithList;POST;Borde;Crear usuarios con lista vacía;Baja;Por analogía;200;-;Automatizar;Positivo de borde. Análogo a USR-010.
+USR-014;/user/createWithList;POST;Negativo;Crear usuarios enviando un objeto en vez de lista;Media;Por analogía;400;-;Hallazgo;Por analogía con PET-006 y STO-011 un body con forma incorrecta produce 500.
+USR-015;/user/{username};GET;Positivo;Obtener usuario existente;Alta;Por analogía;200;-;Automatizar;200 documentado. Determinista con un usuario propio.
+USR-016;/user/{username};GET;Positivo;Obtener usuario en formato XML;Baja;Por analogía;200;-;Automatizar;200 documentado con produces application/xml.
+USR-017;/user/{username};GET;Negativo;Obtener usuario inexistente;Alta;Sí;404;404;Automatizar;Control: 404 User not found documentado y verificado.
+USR-018;/user/{username};GET;Borde;Obtener usuario con caracteres especiales;Media;Por analogía;200;-;Automatizar;Positivo de borde con un usuario propio. Encodear el path.
+USR-019;/user/{username};GET;Borde;Obtener usuario con username de solo espacios;Media;Por analogía;400;-;Pregunta al negocio;La spec no define qué es un username inválido.
+USR-020;/user/{username};GET;Borde;Obtener usuario con username muy largo;Baja;Por analogía;404;-;Automatizar;Inexistente: análogo al control USR-017.
+USR-021;/user/{username};PUT;Positivo;Actualizar usuario existente;Alta;Por analogía;200;-;Automatizar;Positivo análogo a otros éxitos verificados. La precondición de login no es necesaria.
+USR-022;/user/{username};PUT;Negativo;Actualizar usuario inexistente;Alta;Por analogía;404;-;Automatizar;404 documentado. Análogo al control USR-017.
+USR-023;/user/{username};PUT;Negativo;Actualizar usuario con JSON mal formado;Media;Por analogía;400;-;Hallazgo;400 documentado. Patrón confirmado en PET-005: un body no parseable devuelve 500.
+USR-024;/user/{username};PUT;Negativo;Actualizar usuario con tipo incorrecto en userStatus;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con STO-011 un tipo incorrecto produce 500.
+USR-025;/user/{username};PUT;Borde;Actualizar con username del body distinto al del path;Media;Por analogía;400;-;Pregunta al negocio;La spec no define qué username prevalece si el path y el body difieren.
+USR-026;/user/{username};PUT;Seguridad;Actualizar usuario sin sesión iniciada;Alta;Por analogía;401;-;Pregunta al negocio;Análogo a USR-008: la API no exige sesión.
+USR-027;/user/{username};DELETE;Positivo;Eliminar usuario existente;Alta;Por analogía;200;-;Automatizar;Positivo análogo a otros éxitos de eliminación verificados.
+USR-028;/user/{username};DELETE;Negativo;Eliminar usuario inexistente;Alta;Por analogía;404;-;Automatizar;404 documentado. Análogo al control USR-017.
+USR-029;/user/{username};DELETE;Borde;Eliminar usuario con username de solo espacios;Media;Por analogía;400;-;Pregunta al negocio;La spec no define qué es un username inválido.
+USR-030;/user/{username};DELETE;Seguridad;Eliminar usuario sin sesión iniciada;Alta;Por analogía;401;-;Pregunta al negocio;Análogo a USR-008: la API no exige sesión.
+USR-031;/user/{username};DELETE;Seguridad;Eliminar a otro usuario estando logueado;Alta;Por analogía;403;-;Pregunta al negocio;La spec no define la autorización entre usuarios.
+USR-032;/user/login;GET;Positivo;Login con credenciales válidas;Alta;Por analogía;200;-;Automatizar;200 y headers documentados. No distingue login válido de inválido (USR-033), validar también los headers.
+USR-033;/user/login;GET;Negativo;Login con password incorrecta;Alta;Sí;400;200;Hallazgo;Password incorrecta devuelve 200 con "logged in user session" en vez del 400 documentado.
+USR-034;/user/login;GET;Negativo;Login con usuario inexistente;Alta;Sí;400;200;Hallazgo;Usuario inexistente devuelve 200 con "logged in user session" en vez del 400 documentado.
+USR-035;/user/login;GET;Negativo;Login sin username;Media;Sí;400;200;Hallazgo;Login sin username devuelve 200 con "logged in user session" en vez del 400 documentado.
+USR-036;/user/login;GET;Negativo;Login sin password;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con USR-035 el login no rechaza un parámetro requerido faltante.
+USR-037;/user/login;GET;Borde;Login con username y password vacíos;Media;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con USR-033 a USR-035 el login acepta cualquier credencial.
+USR-038;/user/login;GET;Seguridad;Login con payload de inyección en username;Alta;Por analogía;400;-;Hallazgo;400 documentado. Por analogía con USR-033 y USR-034 el login acepta cualquier credencial.
+USR-039;/user/logout;GET;Positivo;Logout con sesión iniciada;Alta;Por analogía;200;-;Automatizar;Positivo análogo a USR-040, verificado con 200.
+USR-040;/user/logout;GET;Borde;Logout sin sesión iniciada;Baja;Sí;200;200;Automatizar;Supuesto de éxito verificado: 200 con message ok.
+USR-041;/user/logout;GET;Seguridad;Operación protegida rechazada tras logout;Alta;Por analogía;401;-;Pregunta al negocio;La API no exige sesión (USR-008), así que no hay sesión que invalidar. Definir el modelo de sesión.

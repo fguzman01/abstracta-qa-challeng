@@ -11,4 +11,8 @@ export class StoreClient {
   getOrderById(id: number): Promise<APIResponse> {
     return this.request.get(`store/order/${id}`);
   }
+
+  deleteOrder(id: number): Promise<APIResponse> {
+    return this.request.delete(`store/order/${id}`);
+  }
 }
