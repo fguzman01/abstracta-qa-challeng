@@ -18,7 +18,14 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['allure-playwright', {
+      resultsDir: 'allure-results',
+      environmentInfo: { Ambiente: ENV, 'Base URL': BASE_URL },
+    }],
+  ],
 
   use: {
     baseURL: BASE_URL, // debe terminar en "/" (ej: .../v2/)
@@ -26,7 +33,7 @@ export default defineConfig({
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
   },
 
   projects: [
