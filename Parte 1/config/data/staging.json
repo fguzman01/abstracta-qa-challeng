@@ -1,4 +1,5 @@
 {
+  "baseUrl": "https://petstore.swagger.io/v2/",
   "petNamePrefix": "STG",
   "category": { "id": 1, "name": "Dogs" },
   "tags": [{ "id": 1, "name": "staging" }]

@@ -1,31 +1,28 @@
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
+import { ENV, envData } from './config/test-data';
 
-const ENV = process.env.ENV ?? 'staging';
-dotenv.config({ path: path.resolve(__dirname, `.env.${ENV}`) });
-
-const BASE_URL = process.env.BASE_URL;
-if (!BASE_URL) {
-  throw new Error(`Falta BASE_URL para ENV=${ENV}. Revisa el archivo .env.${ENV}`);
-}
+// La URL de cada ambiente vive en config/data/<ambiente>.json. La variable BASE_URL
+// permite sobrescribirla sin tocar archivos (por ejemplo, desde el CI).
+const BASE_URL = process.env.BASE_URL ?? envData.baseUrl;
 
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  // En CI se limita a 2: los runners tienen 2 núcleos.
   workers: process.env.CI ? 2 : undefined,
   reporter: [
     ['list'],
+    // Sin esto, el reporte se abre solo al fallar y bloquea la terminal (y el pipeline).
     ['html', { open: 'never' }],
     ['allure-playwright', {
       resultsDir: 'allure-results',
-      environmentInfo: { Ambiente: ENV, 'Base URL': BASE_URL},
+      environmentInfo: { Ambiente: ENV, 'Base URL': BASE_URL },
     }],
   ],
 
-   // Demoblaze carga productos, carrito y totales por AJAX desde una API externa
+  // Demoblaze carga productos, carrito y totales por AJAX desde una API externa
   // que puede tardar varios segundos, sobre todo con muchos browsers en paralelo.
   expect: { timeout: 15_000 },
 
@@ -36,7 +33,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     // Pausa entre acciones solo para observar la ejecución (npm run test:slow). Por defecto es 0.
     launchOptions: {
-    slowMo: Number(process.env.SLOW_MO ?? 500),
+      slowMo: Number(process.env.SLOW_MO ?? 0),
     },
   },
 

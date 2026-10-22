@@ -1,16 +1,9 @@
 import { defineConfig } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
+import { ENV, envData } from './config/test-data';
 
-// Ambiente activo: staging por defecto
-const ENV = process.env.ENV ?? 'staging';
-dotenv.config({ path: path.resolve(__dirname, `.env.${ENV}`) });
-
-// Falla rápido si el ambiente no está bien configurado
-const BASE_URL = process.env.BASE_URL;
-if (!BASE_URL) {
-  throw new Error(`Falta BASE_URL para ENV=${ENV}. Revisa el archivo .env.${ENV}`);
-}
+// La URL de cada ambiente vive en config/data/<ambiente>.json. La variable BASE_URL
+// permite sobrescribirla sin tocar archivos (por ejemplo, desde el CI).
+const BASE_URL = process.env.BASE_URL ?? envData.baseUrl;
 
 export default defineConfig({
   testDir: './tests',
@@ -35,6 +28,7 @@ export default defineConfig({
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
+    // En API no hay screenshot ni video: la evidencia de un fallo es el tráfico HTTP del trace.
     trace: 'retain-on-failure',
   },
 

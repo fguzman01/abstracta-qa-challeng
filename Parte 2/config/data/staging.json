@@ -1,4 +1,5 @@
 {
+  "baseUrl": "https://www.demoblaze.com/",
   "product": "Samsung galaxy s6",
   "cartProducts": ["Samsung galaxy s6", "Nexus 6"],
   "customer": {

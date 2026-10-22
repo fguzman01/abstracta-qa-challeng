@@ -3,21 +3,24 @@ import path from 'path';
 import { Customer } from '../src/types/customer';
 
 export interface EnvData {
+  baseUrl: string;
   product: string;
   cartProducts: string[];
   customer: Customer;
 }
 
-const ENV = process.env.ENV ?? 'staging';
+// Ambiente activo: staging por defecto, para no apuntar a producción por accidente.
+export const ENV = process.env.ENV ?? 'staging';
 const filePath = path.resolve(__dirname, 'data', `${ENV}.json`);
 
 if (!fs.existsSync(filePath)) {
-  throw new Error(`No existe el archivo de datos para ENV=${ENV}: ${filePath}`);
+  throw new Error(`No existe la configuración para ENV=${ENV}: ${filePath}`);
 }
 
 const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as EnvData;
 
-const requiredKeys: (keyof EnvData)[] = ['product', 'cartProducts', 'customer'];
+// Los types no validan en ejecución: si falta un campo, se falla aquí con un mensaje claro.
+const requiredKeys: (keyof EnvData)[] = ['baseUrl', 'product', 'cartProducts', 'customer'];
 const missingKeys = requiredKeys.filter((key) => data[key] === undefined);
 
 if (missingKeys.length > 0) {
