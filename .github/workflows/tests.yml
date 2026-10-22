@@ -68,7 +68,7 @@ jobs:
     # Imagen oficial de Playwright: trae los browsers y sus dependencias preinstalados.
     # Su versión debe coincidir con la de @playwright/test del proyecto.
     container:
-      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
       options: --user 1001
     # Sin "defaults.working-directory": dentro de un container, una ruta con espacios
     # ("Parte 2") rompe el comando de Docker. Cada paso entra a la carpeta con cd.
