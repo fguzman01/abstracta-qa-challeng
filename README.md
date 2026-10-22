@@ -108,3 +108,4 @@ No se requieren secretos ni variables configuradas en GitHub: la URL y los datos
 - **Caché de npm** por proyecto (`cache-dependency-path`), para acelerar las instalaciones.
 - **`working-directory`** por job, porque cada parte es un proyecto independiente. Las rutas de los artefactos se escriben completas (`Parte 1/allure-report`), ya que `working-directory` solo aplica a los pasos `run`.
 - **Ambiente por variable global** `ENV`: en push vale `staging`, y en ejecución manual toma el valor elegido. Los proyectos ya leen `ENV`, por lo que no requieren cambios para CI.
+- **Imagen oficial de Playwright** en el job de UI (`mcr.microsoft.com/playwright`): trae los browsers y sus dependencias preinstalados, por lo que el pipeline no depende de los mirrors de Ubuntu. Su versión debe coincidir con la de `@playwright/test` del proyecto.

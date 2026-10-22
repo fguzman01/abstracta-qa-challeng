@@ -64,6 +64,9 @@ jobs:
     name: Parte 2 - UI
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
     defaults:
       run:
         working-directory: 'Parte 2'
@@ -80,10 +83,6 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
-
-      - name: Instalar browsers
-        run: npx playwright install --with-deps
-        timeout-minutes: 10
 
       - name: Ejecutar tests
         run: npx playwright test
