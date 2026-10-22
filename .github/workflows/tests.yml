@@ -34,6 +34,7 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
+
       - name: Validar tipos
         run: npm run typecheck
 
@@ -60,7 +61,7 @@ jobs:
           path: 'Parte 1/playwright-report'
           retention-days: 14
 
-    ui-tests:
+  ui-tests:
     name: Parte 2 - UI
     runs-on: ubuntu-latest
     timeout-minutes: 30
