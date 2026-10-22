@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Customer } from '../src/types/customer';
-// data
+// data 1 2 3
 export interface EnvData {
   baseUrl: string;
   product: string;
