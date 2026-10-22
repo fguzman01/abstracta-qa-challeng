@@ -51,14 +51,14 @@ Los scripts `test:stg` y `test:prod` usan `cross-env`, por lo que funcionan igua
 
 ```
 config/
-  data/            Datos de prueba por ambiente (JSON)
+  data/            Datos por ambiente (JSON) y factories (pet, order, user)
   test-data.ts     Carga los datos del ambiente activo
 src/
-  clients/         Un client por recurso de la API (PetClient, StoreClient)
-  data/            Factories que generan datos válidos con ids únicos
+  clients/         Un client por recurso de la API (PetClient, StoreClient, UserClient)
   fixtures/        Inyectan los clients en los tests
-  types/           Modelos de datos según el Swagger (Pet, Order)
+  type/            Modelos de datos según el Swagger (Pet, Order, User)
 tests/             Specs por escenario
+  ai-generated/    Tests generados con IA en la Parte 5B
 ```
 
 **Flujo:** el test pide un client por fixture → arma sus datos con una factory → el client hace el request usando la `baseURL` del ambiente activo.
@@ -73,6 +73,9 @@ Para agregar pruebas de un recurso nuevo (ej: `user`): crear su type, su client 
 | `store-orders.spec.ts` | **B:** lista mascotas disponibles, guarda 5 en un `Map` y crea una orden para cada una |
 | `pet-status.spec.ts` | **C:** crea una mascota, la cambia de available a sold y verifica el cambio consultando por estado |
 | `smoke.spec.ts` | Verificación rápida: crear y obtener una mascota |
+| `ai-generated/*.spec.ts` | Casos generados y evaluados con IA (Parte 5B), incluido el recurso User |
+| `ai-generated/hallazgos.spec.ts` | Defectos verificados de la API, marcados con `test.fail()`: validan lo que dice la spec y fallan como se espera mientras el defecto exista |
+
 
 ## Decisiones técnicas
 
@@ -144,5 +147,6 @@ Además se paralelizó **dentro** del test más lento: el escenario A crea sus 1
 | Secuencial (1 worker) | 5.3 s | — |
 | Paralelo (4 workers) | 2.9 s | 45% menos |
 | Paralelo + `Promise.all` en escenario A | 2.4 s | **55% menos** |
+| `npm run typecheck` | Valida los tipos de TypeScript (Playwright ejecuta los tests sin validarlos) |
 
 **Conclusión:** en paralelo, el tiempo total queda limitado por el test más lento. Agregar workers bajó el tiempo a 2.9 s, pero la última mejora vino de optimizar el escenario A, que tardaba 2.4 s por crear las mascotas de a una.

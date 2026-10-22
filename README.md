@@ -1,3 +1,63 @@
+# Abstracta QA Challenge - Automation Senior
+
+Solución del desafío técnico de automatización: pruebas de API y UI con Playwright + TypeScript, reporting con Allure, ejecución en paralelo, pipeline CI/CD, generación de casos con IA y una prueba de performance con k6.
+
+**Reportes publicados:** [https://<usuario>.github.io/<repo>/](https://<usuario>.github.io/<repo>/)
+
+## Contenido
+
+| Carpeta | Parte | Descripción |
+|---|---|---|
+| [`Parte 1/`](Parte%201/README.md) | 1, 3 y 4.1 | Pruebas de API sobre Swagger Petstore |
+| [`Parte 2/`](Parte%202/README.md) | 2, 3 y 4.1 | Pruebas de UI sobre Demoblaze con Page Object Model |
+| [`.github/workflows/`](.github/workflows/tests.yml) | 4.2 | Pipeline de GitHub Actions |
+| [`Parte 5B/`](Parte%205B/) | 5B | Generación y evaluación de casos de prueba con IA (entregable en PDF) |
+| [`Parte 6/`](Parte%206/README.md) | 6 | Prueba de carga con k6 |
+
+Las Partes 3 (reporting) y 4.1 (paralelización) se implementaron sobre los proyectos de las Partes 1 y 2. Cada README documenta su sección correspondiente.
+
+## Requisitos
+
+- Node.js 20 o superior
+- npm
+- [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/) (solo para la Parte 6)
+
+## Inicio rápido
+
+Cada parte es un proyecto independiente y se ejecuta desde su propia carpeta.
+
+```bash
+# Parte 1 - API
+cd "Parte 1"
+npm install
+npm run test:stg
+
+# Parte 2 - UI
+cd "Parte 2"
+npm install
+npx playwright install
+npm run test:stg
+
+# Reporte Allure (en cualquiera de las dos)
+npm run report:generate
+npm run report:open
+
+# Parte 6 - Performance
+cd "Parte 6"
+k6 run scripts/list-pets.js
+```
+
+Para ejecutar en producción, usar `npm run test:prod`. Cada README explica cómo funcionan los ambientes y cómo agregar uno nuevo.
+
+## Resumen de decisiones
+
+- **Un framework por tipo de prueba:** API y UI son proyectos separados, con dependencias y configuración propias, pero con la misma arquitectura (clients o pages, fixtures, factories y datos por ambiente).
+- **Datos aislados en servicios compartidos:** la Petstore y Demoblaze son públicas. Todos los datos se crean con ids únicos y cada test es independiente, lo que permite ejecutar en paralelo.
+- **Esperas por condición, nunca por tiempo:** reintentos acotados (`expect.poll`, `toPass`) donde el servicio es inconsistente, y esperas por cambios reales del DOM en la UI.
+- **Fallar con mensajes claros:** el ambiente y los datos de prueba se validan al iniciar, y las aserciones explican qué se esperaba.
+- **Defectos documentados como tests:** los defectos encontrados en la API (Parte 5B) se automatizaron con `test.fail()`, para que queden vigilados en el pipeline.
+
+<!-- Pega aquí tu sección "## Parte 4.2 - Pipeline CI/CD" -->
 ## Parte 4.2 - Pipeline CI/CD
 
 ### Herramienta elegida
@@ -24,7 +84,7 @@ Los jobs de API y UI corren **en paralelo**. En CI cada proyecto usa 2 workers (
 
 ### Cómo ver los reportes
 
-- **GitHub Pages:** [https://<usuario>.github.io/<repo>/](https://<usuario>.github.io/<repo>/), con el último reporte de `main` (índice con links a API y UI).
+- **GitHub Pages:** [https://github.com/fguzman01/abstracta-qa-challeng/](https://github.com/fguzman01/abstracta-qa-challeng/), con el último reporte de `main` (índice con links a API y UI).
 - **Artefactos descargables:** en cada ejecución (Actions → la ejecución → sección *Artifacts*) quedan disponibles por 14 días:
   - `allure-report-api-<ambiente>` y `allure-report-ui-<ambiente>`
   - `playwright-report-api-<ambiente>` y `playwright-report-ui-<ambiente>`
