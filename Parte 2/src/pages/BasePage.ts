@@ -1,6 +1,8 @@
 // src/pages/BasePage.ts
 import { Locator, Page } from '@playwright/test';
 
+// Lo común a todas las pantallas: navegar y la barra superior. Cada page define
+// su propia ruta y qué significa "cargada" en su goto().
 export abstract class BasePage {
   private readonly cartLink: Locator;
 

@@ -19,6 +19,9 @@ test('Escenario A: crear 10 mascotas por estado y obtener la vendida', async ({ 
     }
   }
 
+// Las 10 creaciones se lanzan en paralelo: en ejecución paralela, el tiempo total
+// lo define el test más lento, y este era el más lento al crear de a una.
+
   const responses = await Promise.all(petsToCreate.map((pet) => petClient.create(pet)));
 
   for (const response of responses) {

@@ -5,6 +5,9 @@ import { Pet, PetStatus } from '../src/type/pet';
 
 const POLL_OPTIONS = { timeout: 15_000, intervals: [1_000, 2_000, 3_000] };
 
+// Devuelve true/false si la consulta funcionó, o un texto si falló (HTTP de error o
+// JSON inválido). Así un error nunca se confunde con "la mascota no está", y el test
+// no puede pasar en verde sin haber verificado nada.
 async function isPetListedWithStatus(
   petClient: PetClient,
   petId: number,

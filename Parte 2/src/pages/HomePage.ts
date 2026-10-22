@@ -27,6 +27,7 @@ export class HomePage {
         products.push({
             name,
             price: Number(priceText.replace(/[^0-9.]/g, '')),
+            // El href viene relativo (prod.html?idp_=1): se completa a URL absoluta para el archivo.
             link: new URL(href ?? '', this.page.url()).toString(),
             });
         }
@@ -34,6 +35,8 @@ export class HomePage {
         return products;
     }
 
+    // La grilla se reemplaza por AJAX y la URL no cambia. Se espera a que cambie el primer
+    // producto: si se leyera justo después del clic, se volvería a leer la página 1.
     async goToNextPage(): Promise<void> {
         const firstTitle = this.productCards.first().locator('.card-title a');
         const titleBefore = await firstTitle.innerText();

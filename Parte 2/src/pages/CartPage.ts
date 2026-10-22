@@ -25,6 +25,8 @@ export class CartPage extends BasePage {
         await expect(this.cartRows.filter({ hasText: name })).toBeVisible();
     }
 
+    // El total llega por AJAX. Sin esta espera se leería "" y Number("") da 0,
+    // un número válido que ocultaría el error.
     async getTotal(): Promise<number> {
         await expect(this.totalPrice).not.toBeEmpty();
         return Number(await this.totalPrice.innerText());

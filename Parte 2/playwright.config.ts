@@ -25,11 +25,16 @@ export default defineConfig({
     }],
   ],
 
+   // Demoblaze carga productos, carrito y totales por AJAX desde una API externa
+  // que puede tardar varios segundos, sobre todo con muchos browsers en paralelo.
+  expect: { timeout: 15_000 },
+
   use: {
     baseURL: BASE_URL,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
+    // Pausa entre acciones solo para observar la ejecución (npm run test:slow). Por defecto es 0.
     launchOptions: {
     slowMo: Number(process.env.SLOW_MO ?? 500),
     },

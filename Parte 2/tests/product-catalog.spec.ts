@@ -30,6 +30,7 @@ test('Escenario A: obtener productos de las primeras 2 páginas y generar archiv
     }
 
     const env = process.env.ENV ?? 'staging';
+    // Un archivo por browser: en paralelo, los tres escribían el mismo archivo y se pisaban.
     const browser = test.info().project.name;
     const filePath = writeProductsFile(allProducts, `products-${env}-${browser}.txt`);
     await test.info().attach('products', { path: filePath, contentType: 'text/plain' });

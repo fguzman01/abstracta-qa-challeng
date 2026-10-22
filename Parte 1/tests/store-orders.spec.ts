@@ -12,6 +12,8 @@ test('Escenario B: listar mascotas disponibles y crear una orden para 5 de ellas
   await test.step(`Listar mascotas disponibles y guardar ${PETS_TO_ORDER}`, async () => {
     let pets: Pet[] = [];
 
+    // La Petstore pública responde 500 de forma intermitente en este listado (datos
+    // corruptos de otros usuarios). Se reintenta solo esta lectura, hasta 15 s.  
     await expect(async () => {
       const response = await petClient.findByStatus('available');
       await expect(response, 'El listado de mascotas disponibles debe responder 2xx').toBeOK();
@@ -20,6 +22,9 @@ test('Escenario B: listar mascotas disponibles y crear una orden para 5 de ellas
 
     for (const pet of pets) {
       if (selectedPets.size === PETS_TO_ORDER) break;
+
+      // Se descartan ids mayores a 2^53: JavaScript los redondea al parsear el JSON,
+      // y la orden quedaría asociada a otra mascota.
       if (Number.isSafeInteger(pet.id) && pet.status === 'available') {
         selectedPets.set(pet.id, pet);
       }

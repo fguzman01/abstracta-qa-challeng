@@ -88,6 +88,7 @@ output/            Archivos generados por los tests (no se versiona)
 - **Links absolutos:** el `href` de los productos es relativo y se convierte a URL completa antes de escribirlo en el archivo.
 - **Evidencia de fallo:** screenshot y video solo cuando un test falla (`only-on-failure` / `retain-on-failure`).
 - **Modo lento (`SLOW_MO`):** pausa entre acciones y antes de aceptar diálogos, solo para observar la ejecución. Con `SLOW_MO=0` (por defecto) no afecta los tiempos.
+- **Timeout de aserciones en 15 s:** Demoblaze depende de una API externa cuya velocidad varía. Con 5 s (el valor por defecto) aparecieron fallas intermitentes al ejecutar 11 browsers en paralelo, que no ocurrían con 1 worker. Como las esperas son por condición, el timeout solo pesa cuando el sitio realmente está lento.
 
 ## Posibles mejoras
 

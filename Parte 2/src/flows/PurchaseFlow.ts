@@ -10,6 +10,9 @@ export interface PurchaseResult {
   confirmation: PurchaseConfirmation;
 }
 
+// Secuencia de negocio que cruza varias pantallas y se repite en varios tests.
+// El flow hace y valida lo mínimo para avanzar; las validaciones de negocio van en el test.
+
 export class PurchaseFlow {
   constructor(
     private readonly homePage: HomePage,

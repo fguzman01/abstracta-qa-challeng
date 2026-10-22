@@ -1,5 +1,10 @@
 import { Page, test } from '@playwright/test';
 
+// Acepta un alert nativo dentro del listener, apenas aparece.
+// - Si se esperara después de la acción, un alert que aparece durante el clic
+//   bloquea la página y el clic nunca termina (deadlock).
+// - Se resuelve recién después de aceptar: si el test navegara antes, el accept
+//   fallaría con "Not attached to an active page".
 export async function acceptNextDialog(page: Page, action: () => Promise<void>): Promise<string> {
   const viewDelay = Number(process.env.SLOW_MO ?? 0);
 

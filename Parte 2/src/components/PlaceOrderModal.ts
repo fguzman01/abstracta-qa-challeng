@@ -7,6 +7,8 @@ export interface PurchaseConfirmation {
   details: string;
 }
 
+// Componente y no page: el modal no tiene URL propia, vive dentro de CartPage.
+
 export class PlaceOrderModal {
   private readonly nameInput: Locator;
   private readonly countryInput: Locator;

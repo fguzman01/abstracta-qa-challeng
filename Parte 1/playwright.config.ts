@@ -17,9 +17,11 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  // En CI se limita a 2: los runners tienen 2 núcleos y no conviene saturar una API pública.
   workers: process.env.CI ? 2 : undefined,
   reporter: [
     ['list'],
+    // Sin esto, el reporte se abre solo al fallar y bloquea la terminal (y el pipeline).
     ['html', { open: 'never' }],
     ['allure-playwright', {
       resultsDir: 'allure-results',
