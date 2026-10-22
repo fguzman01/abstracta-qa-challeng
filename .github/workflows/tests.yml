@@ -60,16 +60,17 @@ jobs:
           path: 'Parte 1/playwright-report'
           retention-days: 14
 
-  ui-tests:
+    ui-tests:
     name: Parte 2 - UI
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Imagen oficial de Playwright: trae los browsers y sus dependencias preinstalados.
+    # Su versión debe coincidir con la de @playwright/test del proyecto.
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-noble
       options: --user 1001
-    defaults:
-      run:
-        working-directory: 'Parte 2'
+    # Sin "defaults.working-directory": dentro de un container, una ruta con espacios
+    # ("Parte 2") rompe el comando de Docker. Cada paso entra a la carpeta con cd.
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -82,14 +83,14 @@ jobs:
           cache-dependency-path: 'Parte 2/package-lock.json'
 
       - name: Instalar dependencias
-        run: npm ci
+        run: cd "Parte 2" && npm ci
 
       - name: Ejecutar tests
-        run: npx playwright test
+        run: cd "Parte 2" && npx playwright test
 
       - name: Generar reporte Allure
         if: ${{ !cancelled() }}
-        run: npm run report:generate
+        run: cd "Parte 2" && npm run report:generate
 
       - name: Publicar reporte Allure
         if: ${{ !cancelled() }}
