@@ -1,24 +1,16 @@
-//import { test, expect } from '@playwright/test';
-import { PetClient } from '../src/clients/PetClient';
-import { Pet } from '../src/type/pet';
-import { envData } from '../config/test-data';
-import { buildPet } from '../config/data/pet.factory';
 import { test, expect } from '../src/fixtures/api.fixture';
+import { buildPet } from '../config/data/pet.factory';
+import { Pet } from '../src/type/pet';
 
 test('smoke: crear y obtener una mascota', async ({ petClient }) => {
-  //const petClient = new PetClient(request);
-
   const pet = buildPet();
 
   const createResponse = await petClient.create(pet);
-  expect(createResponse).toBeOK();
+  await expect(createResponse).toBeOK();
 
   const getResponse = await petClient.getById(pet.id);
-  expect(getResponse).toBeOK();
+  await expect(getResponse).toBeOK();
 
   const body: Pet = await getResponse.json();
-  console.log('Mascota obtenida:', body);
-  expect(body.id).toBe(pet.id);
-  expect(body.name).toBe(pet.name);
-  expect(body.status).toBe(pet.status);
+  expect(body).toMatchObject({ id: pet.id, name: pet.name, status: pet.status });
 });
