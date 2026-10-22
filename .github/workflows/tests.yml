@@ -83,6 +83,7 @@ jobs:
 
       - name: Instalar browsers
         run: npx playwright install --with-deps
+        timeout-minutes: 10
 
       - name: Ejecutar tests
         run: npx playwright test
